@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 public class Faction {
+
     private String name;
     private UUID owner;
     private Location spawnPoint;

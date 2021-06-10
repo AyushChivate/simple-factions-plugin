@@ -13,6 +13,7 @@ public final class FactionsPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+
         CoreLib.setInstance(this);
         HashMap<String, Object> folderInfo = new HashMap<>();
         folderInfo.put("faction-data", getDataFolder());
@@ -32,8 +33,10 @@ public final class FactionsPlugin extends JavaPlugin {
         for (File file : factionData.listFiles()) {
             FactionSaveData factionSaveData = new FactionSaveData(file);
             System.out.println("File name: " + file.getName());
-            FactionMap.addFaction(file.getName(),factionSaveData.loadData());
+            String fileName = file.getName().replaceAll(".yml","");
+            FactionMap.addFaction(fileName,factionSaveData.loadData());
         }
+
     }
 
     @Override
@@ -64,6 +67,8 @@ public final class FactionsPlugin extends JavaPlugin {
 
             /* save the data */
             factionConfig.saveData();
+
         }
+
     }
 }
