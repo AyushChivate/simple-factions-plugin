@@ -1,0 +1,11 @@
+name: FactionsPlugin
+version: ${project.version}
+main: io.ayushchivate.github.factionsplugin.FactionsPlugin
+api-version: 1.16
+
+commands:
+  simplefactions:
+    description: access to the commands inside the simplefactions plugin
+    aliases:
+      - sf
+
