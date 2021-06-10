@@ -49,19 +49,15 @@ public class PlayerWatcher implements Listener {
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent e) {
 
-        System.out.println("PlayerRespawnEvent has fired.");
-
         /* get the player and their faction */
         Player player = e.getPlayer();
         Faction faction = FactionMap.getPlayerFaction(player);
 
-        System.out.printf("faction: %s, getSpawnPoint(): %s, !isBedSpawn(): %s, getBedSpawnLocation(): %s", faction, faction.getSpawnPoint(), !e.isBedSpawn(), player.getBedSpawnLocation());
-
         /* respawn the player to the faction's spawn point if they are in a faction, the faction has a spawn point set,
          * and the player does not have a bed */
         if (faction != null && faction.getSpawnPoint() != null && player.getBedSpawnLocation() == null) {
-            System.out.println("I have reached the setRespawnLocation() line.");
             e.setRespawnLocation(faction.getSpawnPoint());
         }
+
     }
 }

@@ -6,6 +6,8 @@ import org.bukkit.Location;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import java.io.File;
 import java.util.HashSet;
@@ -14,7 +16,7 @@ import java.util.UUID;
 
 public class SimpleFactionsCommand implements CommandExecutor {
 
-    FactionsPlugin plugin;
+    private FactionsPlugin plugin;
 
     public SimpleFactionsCommand(FactionsPlugin plugin) {
         this.plugin = plugin;
@@ -134,12 +136,19 @@ public class SimpleFactionsCommand implements CommandExecutor {
         /* teleport the player to the faction's spawn point */
         faction.teleportPlayer(player);
 
+        Team factionTeam = plugin.getFactionsScoreboard().getTeam(faction.getName());
+        if(factionTeam != null){
+            factionTeam.addPlayer(player);
+            plugin.updateScoreboards();
+        }
         /* send player and owner success messages */
         player.sendMessage(ChatColor.GREEN + "You have joined the " + factionName + " faction.");
         Player owner = Bukkit.getPlayer(faction.getOwner());
         if (owner != null) {
             owner.sendMessage(ChatColor.YELLOW + player.getDisplayName() + " has joined your faction.");
         }
+
+
     }
 
     private void setspawnCommand(Player player) {
@@ -197,6 +206,9 @@ public class SimpleFactionsCommand implements CommandExecutor {
             return;
         }
 
+        Scoreboard scoreboard = plugin.getFactionsScoreboard();
+        Team factionTeam = scoreboard.getTeam(faction.getName());
+
         /* check if the player is the owner */
         if (faction.getOwner().equals(player.getUniqueId())) {
 
@@ -216,14 +228,25 @@ public class SimpleFactionsCommand implements CommandExecutor {
 
             /* delete faction file */
             File factionData = new File(plugin.getDataFolder() + "/faction-data", faction.getName() + ".yml");
-            System.out.println(faction.getPlayers());
             factionData.delete();
+
+            if(factionTeam != null){
+                factionTeam.unregister();
+            }
+
+            plugin.updateScoreboards();
 
             /* if the player is not an owner */
         } else {
             /* remove the player and send them a success message */
             faction.removePlayer(player);
-            System.out.println(faction.getPlayers());
+
+            if(factionTeam != null){
+                factionTeam.removePlayer(player);
+                plugin.getNonFactionTeam().addPlayer(player);
+                plugin.updateScoreboards();
+            }
+
             player.sendMessage(ChatColor.GREEN + "You have left the faction.");
         }
     }

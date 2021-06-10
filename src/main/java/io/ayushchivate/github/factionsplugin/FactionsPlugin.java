@@ -2,19 +2,30 @@ package io.ayushchivate.github.factionsplugin;
 
 import net.dohaw.corelib.CoreLib;
 import net.dohaw.corelib.JPUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public final class FactionsPlugin extends JavaPlugin {
+
+    private Scoreboard factionsScoreboard;
 
     @Override
     public void onEnable() {
 
         CoreLib.setInstance(this);
+        this.factionsScoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+
         HashMap<String, Object> folderInfo = new HashMap<>();
         folderInfo.put("faction-data", getDataFolder());
         JPUtils.validateFilesOrFolders(folderInfo, true);
@@ -32,10 +43,11 @@ public final class FactionsPlugin extends JavaPlugin {
 
         for (File file : factionData.listFiles()) {
             FactionSaveData factionSaveData = new FactionSaveData(file);
-            System.out.println("File name: " + file.getName());
-            String fileName = file.getName().replaceAll(".yml","");
-            FactionMap.addFaction(fileName,factionSaveData.loadData());
+            String fileName = file.getName().replaceAll(".yml", "");
+            FactionMap.addFaction(fileName, factionSaveData.loadData());
         }
+
+        createScoreboardTeams();
 
     }
 
@@ -71,4 +83,47 @@ public final class FactionsPlugin extends JavaPlugin {
         }
 
     }
+
+    private void createScoreboardTeams() {
+
+        Team nonFactionTeam = factionsScoreboard.registerNewTeam("nonFactionTeam");
+        nonFactionTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (FactionMap.getPlayerFaction(player) == null) {
+                nonFactionTeam.addPlayer(player);
+            }
+        }
+
+        Collection<Faction> factions = FactionMap.getFactions().values();
+        for (Faction faction : factions) {
+
+            if (factionsScoreboard.getTeam(faction.getName()) == null) {
+                Team team = factionsScoreboard.registerNewTeam(faction.getName());
+                for (UUID playerUUID : faction.getPlayers()) {
+                    OfflinePlayer factionMemberOP = Bukkit.getOfflinePlayer(playerUUID);
+                    team.addPlayer(factionMemberOP);
+                }
+                team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.FOR_OTHER_TEAMS);
+            }
+
+        }
+
+        updateScoreboards();
+
+    }
+
+    public void updateScoreboards() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.setScoreboard(factionsScoreboard);
+        }
+    }
+
+    public Team getNonFactionTeam() {
+        return factionsScoreboard.getTeam("nonFactionTeam");
+    }
+
+    public Scoreboard getFactionsScoreboard() {
+        return factionsScoreboard;
+    }
+
 }

@@ -1,11 +1,9 @@
 package io.ayushchivate.github.factionsplugin;
 
 import net.dohaw.corelib.Config;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.UUID;
 
